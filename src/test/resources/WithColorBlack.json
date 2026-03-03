@@ -1,0 +1,13 @@
+{
+  "firstName": "TestUser413812347",
+  "lastName": "TestUser413812347",
+  "address": "MockTown, 23",
+  "metroStation": 4,
+  "phone": "+7 800 355 35 35",
+  "rentTime": 5,
+  "deliveryDate": "2020-06-06",
+  "comment": "give me scooter",
+  "color": [
+    "BLACK"
+  ]
+}

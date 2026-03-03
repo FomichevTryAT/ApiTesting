@@ -1,0 +1,25 @@
+ID: Scooter-1
+
+Описание: Некорректная работа /api/v1/courier/login
+
+Предусловия:
+1) Создан курьер:
+{
+    "login": "ilqslwgycabisriejiyhilqslwgycabisriejiyh",
+    "password": "bxgjqrygdiwkjlijdypa",
+    "firstName": "ninja"
+}
+
+Шаги:
+1) Отправка данных на https://qa-scooter.praktikum-services.ru/api/v1/courier/login с JSON:
+{
+    "login": "ilqslwgycabisriejiyhilqslwgycabisriejiyh",
+}
+
+Ожидаемый результат:
+{
+    "code": 400,
+    "message": "Недостаточно данных для входа"
+}
+
+Фактический результат: Service unavailable
