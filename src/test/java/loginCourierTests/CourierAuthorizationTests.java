@@ -8,10 +8,13 @@ import io.restassured.response.Response;
 import org.apache.commons.text.RandomStringGenerator;
 import org.junit.jupiter.api.*;
 
+import java.time.Duration;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 public class CourierAuthorizationTests {
     private static CourierCreds courierCreds;
@@ -24,7 +27,7 @@ public class CourierAuthorizationTests {
                     .setParam("http.socket.timeout", 5000));
 
     @BeforeAll
-    public static void initCourierAndConn(){
+    public static void initCourierAndConn() {
         RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
         courierCreds = new CourierCreds(RandomStringGenerator.builder().withinRange('a', 'z').get().generate(15),
                 RandomStringGenerator.builder().withinRange('a', 'z').get().generate(15),
@@ -44,7 +47,7 @@ public class CourierAuthorizationTests {
 
     @Test
     @DisplayName("Курьер может авторизоваться")
-    public void courierCanAuthorization(){
+    public void courierCanAuthorization() {
         HashMap<String, String> logoPass = new HashMap<>();
         logoPass.put("login", login);
         logoPass.put("password", password);
@@ -62,14 +65,13 @@ public class CourierAuthorizationTests {
     }
 
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     @DisplayName("Для авторизации надо передать все обязательные поля. Тест без пароля")
-    public void authorizationWithoutLogin(){
+    public void authorizationWithoutLogin() {
         RestAssured.given()
-                .config(config)
                 .header("Content-type", "application/json")
                 .body("{\"login\":\"" + login + "\"}")
                 .when()
-                .log().all()
                 .post("/api/v1/courier/login")
                 .then()
                 .assertThat()
@@ -77,15 +79,19 @@ public class CourierAuthorizationTests {
     }
 
     @Test
+    @Timeout(value = 6, unit = TimeUnit.SECONDS)
     @DisplayName("Для авторизации надо передать все обязательные поля. Тест без логина")
-    public void authorizationWithoutPassword(){
+    public void authorizationWithoutPassword() {
+        HashMap<String, String> onlyLogin = new HashMap<>();
+        onlyLogin.put("login", login);
+
         RestAssured.given()
-                .config(config)
                 .header("Content-type", "application/json")
-                .body("{\"password\":\"" + password + "\"}")
+                .body(onlyLogin)
                 .when()
                 .post("/api/v1/courier/login")
                 .then()
+                .log().all()
                 .assertThat()
                 .statusCode(400);
     }
@@ -101,7 +107,6 @@ public class CourierAuthorizationTests {
                 .config(config)
                 .header("Content-type", "application/json")
                 .body(incorrectLogin)
-                .log().all()
                 .when()
                 .post("/api/v1/courier/login")
                 .then()
@@ -134,11 +139,9 @@ public class CourierAuthorizationTests {
     public static void deleteCourier(){
         if (courierId != null) {
             RestAssured.given()
-                    .log().all()
                     .when()
                     .delete(String.format("/api/v1/courier/%d", courierId))
                     .then()
-                    .log().all()
                     .assertThat()
                     .statusCode(200);
         }
